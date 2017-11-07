@@ -7,8 +7,9 @@ import (
 
 func main() {
 	// testGoRoutine()
+	BasicChannel()
 	// FirstChannel()
-	BufferedChannel()
+	// BufferedChannel()
 	
 }
 
@@ -36,6 +37,14 @@ func BufferedChannel() {
 	fmt.Println(<-c)
 	fmt.Println(<-c)
 	
+}
+
+func BasicChannel() {
+	//Basic example of creating a channel, passing string to channel via Go Routine.
+	chn := make(chan string)
+	go func() { chn <- "ping" }()
+	msg := <-chn
+	fmt.Println(msg)
 }
 
 func FirstChannel() {
