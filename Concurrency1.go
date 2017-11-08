@@ -3,18 +3,20 @@ package main
 
 import (
 	"fmt"
+	"time"
 )
 
 func main() {
 	// testGoRoutine()
-	BasicChannel()
+	// BasicChannel()
 	// FirstChannel()
 	// BufferedChannel()
+	channelSynchronization()
 	
 }
 
 func testGoRoutine() {
-	//Running in different memories
+	//Running GoRoutine in seperate memories
 	LoopMe := func (wrd string) () {
 		for i:=1; i<=5; i++ {
 		fmt.Println(wrd)
@@ -23,20 +25,6 @@ func testGoRoutine() {
 	go LoopMe("Hi from here!") //Called as a Go Routine
 	
 	LoopMe("Hi from another process")
-}
-
-func BufferedChannel() {
-	//Example on creating buffered Channel
-	c := make(chan int, 3) //Second argument is the length of buffer
-	c <- 6
-	c <- 3
-	c <- 5
-	//c3 := func() { c <-5 }
-	//go c3()
-	fmt.Println(<-c)
-	fmt.Println(<-c)
-	fmt.Println(<-c)
-	
 }
 
 func BasicChannel() {
@@ -65,4 +53,34 @@ func FirstChannel() {
 	
 	x,y,z := <-chn, <-chn, <-chn
 	fmt.Println(x, y, z, x+y)
+}
+
+func BufferedChannel() {
+	//Example on creating buffered Channel. Values are transmitted sequentially & received too
+	c := make(chan int, 3) //Second argument is the length of buffer
+	c <- 6
+	c <- 3
+	c <- 5
+	//c3 := func() { c <-5 }
+	//go c3()
+	fmt.Println(<-c)
+	fmt.Println(<-c)
+	fmt.Println(<-c)
+	
+}
+
+func channelSynchronization() {
+	//Synchronize execution across go routines.
+	
+	worker := func(notify chan bool) {
+				fmt.Print("Working....")	
+				time.Sleep(time.Second)
+				fmt.Println("Done")
+				
+				notify <- true
+			}
+		
+	done := make(chan bool, 1)	//Channel used to notify that this function is completed. Sends a value to notify
+	go worker(done) //Starts worker goroutine, passing a channel where it will be notified if its done
+	<- done		//Worker wont execute until it is returned
 }
