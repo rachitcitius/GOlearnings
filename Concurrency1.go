@@ -11,8 +11,9 @@ func main() {
 	// BasicChannel()
 	// FirstChannel()
 	// BufferedChannel()
-	channelSynchronization()
-	
+	// channelSynchronization()
+	// ChannelDirection()
+	goSelect()
 }
 
 func testGoRoutine() {
@@ -83,4 +84,50 @@ func channelSynchronization() {
 	done := make(chan bool, 1)	//Channel used to notify that this function is completed. Sends a value to notify
 	go worker(done) //Starts worker goroutine, passing a channel where it will be notified if its done
 	<- done		//Worker wont execute until it is returned
+}
+
+func ChannelDirection() {
+	//Direction can be set. Channel is meant to only send or receive values can be done if they are parameters
+	pingfun := func(pings chan <- string, msg string) {
+				pings <- msg
+			}
+	
+	pongfun := func(pings <- chan string, pongs chan <- string) {
+			msg := <- pings
+			pongs <- msg
+	}
+	
+	ping := make(chan string, 1)
+	pong := make(chan string, 1)
+	
+	pingfun(ping, "Testing channel direction")
+	pongfun(ping, pong)
+	fmt.Println(<-pong)
+}
+
+func goSelect() {
+	//Select will wait & execute the particular case, whose channel has completed its operation
+	chn1 := make(chan string)
+	chn2 := make(chan string)
+	
+	//1st Go routine for Chn1
+	go func() {
+		time.Sleep(time.Second * 3)
+		chn1 <- "Channel 1"
+	}()
+	
+	//2nd Go routine for Chn2
+	go func() {
+		time.Sleep(time.Second * 1)
+		chn1 <- "Channel 2"
+	}()
+	
+	for i:=0; i<2; i++ {
+		select {
+			case msg1 := <-chn1:
+				fmt.Println("Received from ", msg1)
+			case msg2 := <-chn2:
+				fmt.Println("Received from ", msg2)
+		}
+	}
 }
