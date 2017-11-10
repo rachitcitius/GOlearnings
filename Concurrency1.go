@@ -13,7 +13,10 @@ func main() {
 	// BufferedChannel()
 	// channelSynchronization()
 	// ChannelDirection()
-	goSelect()
+	// goSelect()
+	// SelectNonBlocking()
+	// CloseChannels()
+	RangeChannels()
 }
 
 func testGoRoutine() {
@@ -129,5 +132,64 @@ func goSelect() {
 			case msg2 := <-chn2:
 				fmt.Println("Received from ", msg2)
 		}
+	}
+}
+
+func SelectNonBlocking() {
+//Demonstrating Non Blocking send/receive. If channel does not receive or send, default block is executed
+	messages := make(chan string)
+	//signals := make(chan string)
+	
+	go func() {	messages <- "this is cool" } ()
+	//time.Sleep(time.Second * 1)
+	for {	//infinite loop
+		select {
+			case msg := <- messages:
+				fmt.Println("Received from Messages", msg)
+				return
+			default:
+				fmt.Println("No message received")
+		}
+	}
+}
+
+func CloseChannels() {
+	//This shows how to Close a particular channel, once the work is done
+	jobs := make(chan int, 5)
+	done := make(chan bool)
+	
+	go func() {		//In this Go Routine, we are checking if the jobs channel is open & receiving data
+		for {
+			data, IsOpen := <- jobs
+			if IsOpen {
+				fmt.Println("Data received", data)
+			} else {	//Channel is closed
+				fmt.Println("Data receiving complete!")
+				done <- true
+				return	
+			}
+		}
+	}()
+	
+	//Transmitting data over jobs channel
+	for i:=0; i<3; i++ {
+		jobs <- i
+		fmt.Println("Data Sent", i)
+		time.Sleep(time.Second * 1)
+	}
+	close(jobs)		//Close the channel, once all data is sent
+	fmt.Println("Channel Closed!")
+}
+
+func RangeChannels() {
+	//Passing multiple values to a channel & iterating through it
+	queue := make(chan string, 3)
+	queue <- "one"
+	queue <- "two"
+	queue <- "three"
+	close(queue)	
+	
+	for elem:=range queue {
+		fmt.Println(elem)
 	}
 }
