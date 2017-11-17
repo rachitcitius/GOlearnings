@@ -15,13 +15,27 @@ type apiStruc struct {
 	Hair_Color string `json:"hair_color"`
 }
 
+//Global map variable to store the individual response
+var finalResponse map[string]string
+
 func main() {
-	for i:=1;i<=10;i++ {
+	finalResponse = make(map[string]string)
+	http.HandleFunc("/", APIcall)
+	http.ListenAndServe(":1234", nil)	
+}
+
+func APIcall(w http.ResponseWriter, r *http.Request) {
+	r.Header.Set("Content-Type", "text/html")
+	for i:=1;i<=20;i++ {
 		//Calling the API concurrently
 		go QueryServer(strconv.Itoa(i))	
-	}
-	
+	}	
 	time.Sleep(time.Second * 2)
+	w.Write([]byte("<div>"))
+	for a:=range finalResponse {
+		w.Write([]byte( a + "->" + finalResponse[a] + "</br>"))
+	}
+	w.Write([]byte("</div>"))
 }
 
 func QueryServer(s string) {
@@ -34,5 +48,5 @@ func QueryServer(s string) {
 	defer resp.Body.Close()		//Closing the response once execution of the function done
 	var apiS apiStruc
 	json.NewDecoder(resp.Body).Decode(&apiS)
-	fmt.Println("For ID", s, apiS)
+	finalResponse[s] = fmt.Sprint(apiS)	//Appending the response in map
 }
