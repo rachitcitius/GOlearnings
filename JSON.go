@@ -38,4 +38,9 @@ func JSONfunctions() {
 	
 	res2B, _ := json.Marshal(res2D)
 	fmt.Println(string(res2B))
+	
+	fruits := `{"page":2, "fruits" : ["pineapple", "guava", "orange", "kiwi"]}`
+	res := Response2{}
+	json.Unmarshal([]byte(fruits), &res)
+	fmt.Println(res)
 }
