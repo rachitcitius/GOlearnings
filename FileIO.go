@@ -12,7 +12,8 @@ import (
 const filePath string="File.txt"
 
 func main() {
-	ReadFile()
+	// ReadFile()
+	WriteFile()
 }
 
 func chkErr(e error) {
@@ -47,4 +48,26 @@ func ReadFile() {
 	
 	
 	defer f.Close()
+}
+
+func WriteFile() {
+	//Basic way to write to a file
+	d1 := []byte("Hello from Go.\n It is really easy to write to a file!\n")
+	err := ioutil.WriteFile("CreatedFromGo.txt", d1, 0644)
+	chkErr(err)
+	
+	//Create file & write with more control
+	fl, err := os.Create("CreatedFromGoNew.txt")
+	chkErr(err)
+	
+	defer fl.Close()
+	
+	data := []byte{65, 112, 13, 97, 13}
+	n2, err := fl.Write(data)
+	chkErr(err)
+	
+	fmt.Printf("Wrote %d bytes to file", n2)
+	
+	fl.WriteString("\nAdded another line!")
+	fl.Sync()
 }
